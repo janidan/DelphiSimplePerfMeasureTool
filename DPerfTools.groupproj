@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{D54D1B5F-159A-434B-8A87-0E794DA60D36}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Source\PerfMeasure.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Source\Sample\SimpleSample.dproj">
+            <Dependencies>Source\Sample\SimplePackage.dproj</Dependencies>
+        </Projects>
+        <Projects Include="Source\Sample\SimplePackage.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="PerfMeasure">
+        <MSBuild Projects="Source\PerfMeasure.dproj"/>
+    </Target>
+    <Target Name="PerfMeasure:Clean">
+        <MSBuild Projects="Source\PerfMeasure.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PerfMeasure:Make">
+        <MSBuild Projects="Source\PerfMeasure.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SimpleSample" DependsOnTargets="SimplePackage">
+        <MSBuild Projects="Source\Sample\SimpleSample.dproj"/>
+    </Target>
+    <Target Name="SimpleSample:Clean" DependsOnTargets="SimplePackage:Clean">
+        <MSBuild Projects="Source\Sample\SimpleSample.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SimpleSample:Make" DependsOnTargets="SimplePackage:Make">
+        <MSBuild Projects="Source\Sample\SimpleSample.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SimplePackage">
+        <MSBuild Projects="Source\Sample\SimplePackage.dproj"/>
+    </Target>
+    <Target Name="SimplePackage:Clean">
+        <MSBuild Projects="Source\Sample\SimplePackage.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SimplePackage:Make">
+        <MSBuild Projects="Source\Sample\SimplePackage.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="PerfMeasure;SimpleSample;SimplePackage"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="PerfMeasure:Clean;SimpleSample:Clean;SimplePackage:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="PerfMeasure:Make;SimpleSample:Make;SimplePackage:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
