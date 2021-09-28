@@ -58,6 +58,7 @@ type
     function IsIncluded( const aUnitName: string ): Boolean;
 
     procedure AddMontitorProcedure( const aProcedureName: string );
+    procedure ReadMonitorProcedureFile( const aFilename: string );
     function MonitorProcedure( const aUnitName: string; const aProcedureName: string ): Boolean;
 
     procedure AddSourceDirectory( const aSourceDirectory: string );
@@ -262,6 +263,25 @@ begin
     Result := vInfo.Monitor
   else
     Result := IsIncluded( aUnitName );
+end;
+
+procedure TConfigUnitList.ReadMonitorProcedureFile( const aFilename: string );
+var
+  InputFile: TextFile;
+  vMethodName: string;
+begin
+  G_LogManager.Log( 'Reading procedures from the following file: ' + aFilename );
+
+  OpenInputFileForReading( aFilename, InputFile );
+  try
+    while not Eof( InputFile ) do
+    begin
+      ReadLn( InputFile, vMethodName );
+      AddMontitorProcedure( vMethodName );
+    end;
+  finally
+    CloseFile( InputFile );
+  end;
 end;
 
 procedure TConfigUnitList.ReadSourcePathFile( const aSourceFileName: string );

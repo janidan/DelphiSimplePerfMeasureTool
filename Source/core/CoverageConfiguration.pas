@@ -73,8 +73,9 @@ type
     procedure ParseExecutableSwitch( var aParameter: Integer );
     procedure ParseSymbolRootSwitch( var aParameter: Integer );
     procedure ParseUnitSwitch( var aParameter: Integer );
-    procedure ParseMontitorProcSwitch( var aParameter: Integer );
     procedure ParseUnitFileSwitch( var aParameter: Integer );
+    procedure ParseMontitorProcSwitch( var aParameter: Integer );
+    procedure ParseMontitorProcFileSwitch( var aParameter: Integer );
     procedure ParseExecutableParametersSwitch( var aParameter: Integer );
     procedure ParseSourcePathsSwitch( var aParameter: Integer );
     procedure ParseSourcePathsFileSwitch( var aParameter: Integer );
@@ -125,6 +126,7 @@ const
   cPARAMETER_DPROJ = '-dproj';
   cPARAMETER_GROUPPROJ = '-groupproj';
   cPARAMETER_MONITOR_PROC = '-proc';
+  cPARAMETER_MONITOR_PROC_FILE = '-procf';
 
 implementation
 
@@ -358,6 +360,8 @@ begin
     ParseUnitFileSwitch( aParameter )
   else if SwitchItem = cPARAMETER_MONITOR_PROC then
     ParseMontitorProcSwitch( aParameter )
+  else if SwitchItem = cPARAMETER_MONITOR_PROC_FILE then
+    ParseMontitorProcFileSwitch( aParameter )
   else if SwitchItem = cPARAMETER_EXECUTABLE_PARAMETER then
     ParseExecutableParametersSwitch( aParameter )
   else if SwitchItem = cPARAMETER_SOURCE_PATHS then
@@ -402,6 +406,19 @@ begin
 
   if FSymbolRootPath = '' then
     FSymbolRootPath := TPath.GetDirectoryName( FExeFileName );
+end;
+
+procedure TCoverageConfiguration.ParseMontitorProcFileSwitch( var aParameter: Integer );
+var
+  vMonitorMethodsFileName: string;
+begin
+  Inc( aParameter );
+  vMonitorMethodsFileName := ParseParameter( aParameter );
+
+  if vMonitorMethodsFileName <> '' then
+    FConfigUnitList.ReadMonitorProcedureFile( vMonitorMethodsFileName )
+  else
+    raise EConfigurationException.Create( 'Expected parameter for procedure file name' );
 end;
 
 procedure TCoverageConfiguration.ParseMontitorProcSwitch( var aParameter: Integer );

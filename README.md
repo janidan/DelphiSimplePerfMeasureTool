@@ -42,6 +42,7 @@ Please consult the command line for a full list of supported switches.
 	<tr><td><code>-u TestUnit TestUnit2</code></td><td>The units that shall be monitored</td></tr>
     <tr><td><code>-uf filename</code></td><td>Cover units listed in the file pointed to by filename. One unit per line in the file</td></tr>
 	<tr><td><code>-proc FullyQualifiedMethodName1 FullyQualifiedMethodNameN</code></td><td>Name of the method to track.</td></tr>
+	<tr><td><code>-procf filename</code></td><td>Methods listed in the file will be monitored. One method per line.</td></tr>
     <tr><td><code>-groupproj MyProjects.group</code></td><td>Delphi projects group file. The units of the projects contained in the groups will be added to the units list</td></tr>
 	<tr><td><code>-dproj MyProject.dproj</code></td><td>Delphi project file. All the units in this project will be added to the units list.</td></tr>
 	<tr><td><code>-sp directory directory2</code></td><td>The directories where the source can be found. A wildcard at the end of a directory will add all directories containing .pas files.</td></tr>

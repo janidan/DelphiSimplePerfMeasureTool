@@ -79,6 +79,7 @@ begin
   ConsoleOutput( cPARAMETER_UNIT_FILE + ' filename        -- a file containing a list of units to create' );
   ConsoleOutput( '                       reports for - one unit per line' );
   ConsoleOutput( cParameter_Monitor_Proc + ' FullyQualifiedMethodName1 FullyQualifiedMethodNameN -- Name of the method to track.' );
+  ConsoleOutput( cPARAMETER_MONITOR_PROC_FILE + ' filename   -- a file containing a list of methods to track. One per line.' );
   ConsoleOutput( cPARAMETER_GROUPPROJ + ' MyProjects.group -- Delphi projects group file. The units of the projects' );
   ConsoleOutput( '                       contained in the groups will be added to the covered units list' );
   ConsoleOutput( cPARAMETER_OUTPUT_DIRECTORY + ' directory       -- the output directory where reports shall be' );
