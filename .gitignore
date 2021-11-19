@@ -13,6 +13,7 @@ bin/**/*.*
 *.tvsconfig
 *.dsk
 *.cbk
+*.delphilsp.json
 
 # Delphi history and backups
 __history/
