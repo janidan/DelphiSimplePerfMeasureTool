@@ -40,7 +40,7 @@ type
     FCoverageConfiguration: ICoverageConfiguration;
     FLogManager: ILogManager;
     FModuleList: TModuleList;
-    FTestExeExitCode: Integer;
+    FTestExeExitCode: Cardinal;
     FLastBreakPoint: IBreakPoint;
   strict private
     procedure AddBreakPoints( //
@@ -608,7 +608,7 @@ end;
 procedure TDebugger.HandleExitProcess( const ADebugEvent: DEBUG_EVENT; var AContProcessEvents: Boolean );
 begin
   FTestExeExitCode := ADebugEvent.ExitProcess.dwExitCode;
-  FLogManager.Log( 'Process ' + IntToStr( ADebugEvent.dwProcessId ) + ' exiting. Exit code :' + IntToStr( ADebugEvent.ExitProcess.dwExitCode ) );
+  FLogManager.Log( 'Process ' + IntToStr( ADebugEvent.dwProcessId ) + ' exiting. Exit code :' + IntToStr( FTestExeExitCode ) );
 
   AContProcessEvents := False;
 end;
