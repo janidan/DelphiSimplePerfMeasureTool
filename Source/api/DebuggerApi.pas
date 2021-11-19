@@ -81,6 +81,8 @@ type
     MethodName: string;
     /// <summary>The line of source code this breakpoint covers in the unit name.</summary>
     Line: Integer;
+    /// <summary>The Virtual Address of the breakpoint in the Module.</summary>
+    VirtualAddress: Cardinal;
   end;
 
 type

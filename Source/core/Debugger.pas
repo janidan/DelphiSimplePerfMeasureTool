@@ -296,6 +296,7 @@ var
   vUnitModuleName: string;
   vMapLineNumber: TJclMapLineNumber;
   vFullyQualifiedMethodName: string;
+  vBreakpointAddress: Pointer;
 begin
   if ( AMapScanner <> nil ) then
   begin
@@ -317,17 +318,12 @@ begin
 
         if aUnitsList.MonitorProcedure( vUnitModuleName, vFullyQualifiedMethodName ) then
         begin
-          FLogManager.Log( 'Setting BreakPoint for module: ' + vUnitModuleName + //
-            ' unit: ' + vUnitFileName + //
-            ' meth: ' + vFullyQualifiedMethodName + //
-            ' addr: ' + AddressToString( vMapLineNumber.VA ) + //
-            ' (' + AddressToString( AddressFromVA( vMapLineNumber.VA, AModule.CodeBegin ) ) + ')' );
-
-          vBreakPoint := FBreakPointList.BreakPointByAddress[( AddressFromVA( vMapLineNumber.VA, AModule.CodeBegin ) )];
+          vBreakpointAddress := AddressFromVA( vMapLineNumber.VA, AModule.CodeBegin );
+          vBreakPoint := FBreakPointList.BreakPointByAddress[vBreakpointAddress];
           if not Assigned( vBreakPoint ) then
           begin
             vBreakPoint := TBreakPoint.Create( FDebugProcess, //
-              AddressFromVA( vMapLineNumber.VA, AModule.CodeBegin ), //
+              vBreakpointAddress, vMapLineNumber.VA, //
               AModule, //
               vFullyQualifiedMethodName, //
               AModule.Name, vUnitModuleName, vUnitFileName, vMapLineNumber.LineNumber, FLogManager );
@@ -352,19 +348,15 @@ procedure TDebugger.HandleCreateProcess( const ADebugEvent: DEBUG_EVENT );
 var
   DebugThread: IDebugThread;
   ProcessName: String;
-  Size: Cardinal;
 begin
   ProcessName := FCoverageConfiguration.ExeFileName;
-
-  Size := GetImageCodeSize( ProcessName );
-
   FLogManager.Log( 'Create Process:' + IntToStr( ADebugEvent.dwProcessId ) + ' name:' + ProcessName );
 
   FDebugProcess := TDebugProcess.Create( //
     ADebugEvent.dwProcessId, //
     ADebugEvent.CreateProcessInfo.hProcess, //
     DWORD( ADebugEvent.CreateProcessInfo.lpBaseOfImage ), //
-    ProcessName, ADebugEvent.CreateProcessInfo.hFile, Size, FMapScanner, FLogManager );
+    ProcessName, ADebugEvent.CreateProcessInfo.hFile, FMapScanner, FLogManager );
 
   DebugThread := TDebugThread.Create( ADebugEvent.dwThreadId, ADebugEvent.CreateProcessInfo.hThread );
 
@@ -622,13 +614,10 @@ end;
 procedure TDebugger.HandleLoadDLL( const ADebugEvent: DEBUG_EVENT );
 var
   DllName: string;
-  ExtraMsg: string;
   Module: TDebugModule;
-  Size: Cardinal;
   MapFile: string;
   MapScanner: TJCLMapScanner;
 begin
-  ExtraMsg := '';
   DllName := GetDllName( FDebugProcess.Handle, ADebugEvent.LoadDll.lpBaseOfDll );
 
   FLogManager.Log( Format( 'Loading DLL (%s) at addr: %s with Handle %d', [DllName, AddressToString( ADebugEvent.LoadDll.lpBaseOfDll ),
@@ -642,8 +631,6 @@ begin
 
   if ( DllName <> '' ) and PathIsAbsolute( DllName ) then
   begin
-    Size := GetImageCodeSize( DllName );
-
     if FDebugProcess.GetModuleByFilename( DllName ) = nil then
     begin
       MapFile := FCoverageConfiguration.GetMapFileName( DllName );
@@ -656,11 +643,8 @@ begin
       else
         MapScanner := nil;
 
-      Module := TDebugModule.Create( DllName, ADebugEvent.LoadDll.hFile, NativeUInt( ADebugEvent.LoadDll.lpBaseOfDll ), Size, MapScanner );
+      Module := TDebugModule.Create( DllName, ADebugEvent.LoadDll.hFile, NativeUInt( ADebugEvent.LoadDll.lpBaseOfDll ), MapScanner );
       FDebugProcess.AddModule( Module );
-      ExtraMsg := ' (' + DllName + ') size :' + IntToStr( Size );
-
-      FLogManager.Log( 'Loading DLL at addr:' + AddressToString( ADebugEvent.LoadDll.lpBaseOfDll ) + ExtraMsg );
       try
         AddBreakPoints( //
           FCoverageConfiguration.UnitList, //

@@ -62,6 +62,7 @@ type
   public
     constructor Create( const aDebugProcess: IDebugProcess; //
       const aAddress: Pointer; //
+      const aVirtualAddress: Cardinal; //
       const aModule: IDebugModule; //
       const aFQName: string; //
       const aModuleName: string; //
@@ -80,8 +81,9 @@ uses
   CoverageConfiguration,
   DebuggerUtils;
 
-constructor TBreakPoint.Create( const aDebugProcess: IDebugProcess; const aAddress: Pointer; const aModule: IDebugModule; const aFQName: string;
-  const aModuleName: string; const aUnitName: string; const aUnitFileName: string; const aLineNumber: integer; const aLogManager: ILogManager );
+constructor TBreakPoint.Create( const aDebugProcess: IDebugProcess; const aAddress: Pointer; const aVirtualAddress: Cardinal; const aModule: IDebugModule;
+  const aFQName: string; const aModuleName: string; const aUnitName: string; const aUnitFileName: string; const aLineNumber: integer;
+  const aLogManager: ILogManager );
 begin
   inherited Create;
 
@@ -96,6 +98,7 @@ begin
   FDetails.UnitName := aUnitName;
   FDetails.UnitFileName := aUnitFileName;
   FDetails.Line := aLineNumber;
+  FDetails.VirtualAddress := aVirtualAddress;
   FDetails.ParseFullyQualifiedName;
 
   FLogManager := aLogManager;
@@ -149,7 +152,7 @@ end;
 
 function TBreakPoint.DetailsToString: string;
 begin
-  Result := Format( 'Breakpoint at %s: %s.%s.%s[%d]', [AddressToString( FAddress ), //
+  Result := Format( 'Breakpoint at %s[%s]: %s.%s.%s[%d]', [AddressToString( FAddress ), AddressToString( FDetails.VirtualAddress ), //
     FDetails.ModuleName, FDetails.ClassName, FDetails.MethodName, FDetails.Line] );
 end;
 
