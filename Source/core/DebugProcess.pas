@@ -34,7 +34,6 @@ type
     FFilename: string;
     FFilepath: string;
     FHFile: THandle;
-    FSize: Cardinal;
     FMapScanner: TJCLMapScanner;
   public
     constructor Create( //
@@ -43,7 +42,6 @@ type
       const aProcessBase: NativeUInt; //
       const aFilepath: string; //
       const aHFile: THandle; //
-      const aSize: Cardinal; //
       const aMapScanner: TJCLMapScanner; //
       const aLogManager: ILogManager );
     destructor Destroy; override;
@@ -87,11 +85,11 @@ end;
 
 function TDebugProcess.CodeEnd: NativeUInt;
 begin
-  Result := FProcessBase + $1000 + FSize;
+  Result := FProcessBase + $1000 + Size;
 end;
 
 constructor TDebugProcess.Create( const aProcessId: DWORD; const aProcessHandle: THandle; const aProcessBase: NativeUInt; const aFilepath: string;
-  const aHFile: THandle; const aSize: Cardinal; const aMapScanner: TJCLMapScanner; const aLogManager: ILogManager );
+  const aHFile: THandle; const aMapScanner: TJCLMapScanner; const aLogManager: ILogManager );
 begin
   inherited Create;
 
@@ -107,7 +105,6 @@ begin
   FHFile := aHFile;
   FLogManager := aLogManager;
   FMapScanner := aMapScanner;
-  FSize := aSize;
 end;
 
 destructor TDebugProcess.Destroy;
@@ -190,7 +187,7 @@ end;
 
 function TDebugProcess.Size: Cardinal;
 begin
-  Result := FSize;
+  Result := GetImageCodeSize( FFilepath );
 end;
 
 function TDebugProcess.MapScanner: TJCLMapScanner;
@@ -200,12 +197,12 @@ end;
 
 function TDebugProcess.Filename: string;
 begin
-
+  Result := FFilename;
 end;
 
 function TDebugProcess.Filepath: string;
 begin
-
+  Result := FFilepath;
 end;
 
 function TDebugProcess.FindDebugModuleFromAddress( Addr: Pointer ): IDebugModule;

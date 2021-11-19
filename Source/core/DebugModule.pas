@@ -42,7 +42,7 @@ type
     function CodeEnd: NativeUInt;
     function MapScanner: TJCLMapScanner;
   public
-    constructor Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aSize: Cardinal; const aMapScanner: TJCLMapScanner );
+    constructor Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJCLMapScanner );
     destructor Destroy; override;
     procedure AfterConstruction; override;
   end;
@@ -66,8 +66,7 @@ begin
   Result := FCodeEnd;
 end;
 
-constructor TDebugModule.Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aSize: Cardinal;
-  const aMapScanner: TJCLMapScanner );
+constructor TDebugModule.Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJCLMapScanner );
 begin
   inherited Create;
   FFilepath := aFilepath;
@@ -76,7 +75,6 @@ begin
 
   FHFile := aHFile;
   FBase := aBase;
-  FSize := aSize;
   FMapScanner := aMapScanner;
 end;
 
@@ -117,7 +115,13 @@ begin
   PEImage := TJCLPEImage.Create;
   try
     PEImage.Filename := FFilepath;
-
+    {$IF Defined(WIN32)}
+    FSize := PEImage.OptionalHeader32.SizeOfCode;
+    {$ELSEIF Defined(WIN64)}
+    FSize := PEImage.OptionalHeader64.SizeOfCode;
+    {$ELSE}
+    {$MESSAGE FATAL 'Unsupported Platform'}
+    {$ENDIF}
     // Code section
     // we may have several sections containing code, so we will iterate and take
     // the lowest given address will be our code begin and the highest the end.
@@ -138,10 +142,10 @@ begin
     begin
       {$IF Defined(WIN32)}
       FCodeBegin := FBase + PEImage.OptionalHeader32.BaseOfCode;
-      FCodeEnd := FCodeBegin + PEImage.OptionalHeader32.SizeOfCode;
+      FCodeEnd := FCodeBegin + FSize; // PEImage.OptionalHeader32.SizeOfCode;
       {$ELSEIF Defined(WIN64)}
       FCodeBegin := FBase + PEImage.OptionalHeader64.BaseOfCode;
-      FCodeEnd := FCodeBegin + PEImage.OptionalHeader64.SizeOfCode;
+      FCodeEnd := FCodeBegin + FSize; //PEImage.OptionalHeader64.SizeOfCode;
       {$ELSE}
       {$MESSAGE FATAL 'Unsupported Platform'}
       {$ENDIF}

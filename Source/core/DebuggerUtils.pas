@@ -357,7 +357,13 @@ begin
   PEImage := TJCLPEImage.Create;
   try
     PEImage.Filename := aFileName;
+    {$IF Defined(WIN32)}
     Result := PEImage.OptionalHeader32.SizeOfCode;
+    {$ELSEIF Defined(WIN64)}
+    Result := PEImage.OptionalHeader64.SizeOfCode;
+    {$ELSE}
+    {$MESSAGE FATAL 'Unsupported Platform'}
+    {$ENDIF}
   finally
     PEImage.Free;
   end;
