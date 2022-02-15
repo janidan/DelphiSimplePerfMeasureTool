@@ -151,7 +151,7 @@ var
   vHours: Integer;
   vMinutes: Integer;
   vSeconds: Integer;
-  vMilliSec: Integer;
+  vSubSecTics: Integer;
   vLeftTicks: Int64;
   vFmt: string;
 begin
@@ -168,7 +168,7 @@ begin
   vHours := ( vLeftTicks div TTimeSpan.TicksPerHour ) mod 24;
   vMinutes := ( vLeftTicks div TTimeSpan.TicksPerMinute ) mod 60;
   vSeconds := ( vLeftTicks div TTimeSpan.TicksPerSecond ) mod 60;
-  vMilliSec := ( vLeftTicks div TTimeSpan.TicksPerMillisecond ) mod 1000;
+  vSubSecTics := ( vLeftTicks mod TTimeSpan.TicksPerSecond );
 
   //vFmt := '%0:d.%1:.2d:%2:.2d:%3:.2d.%4:.7d';
   vFmt := '%3:.2d.%4:.7d'; // Sec.MilliSec
@@ -180,7 +180,7 @@ begin
   if ( vDays <> 0 ) then
     vFmt := '%0:d.' + vFmt;
 
-  Result := Format( vFmt, [vDays, vHours, vMinutes, vSeconds, vMilliSec] );
+  Result := Format( vFmt, [vDays, vHours, vMinutes, vSeconds, vSubSecTics] );
 end;
 
 { TBreakPointDetailHelper }
