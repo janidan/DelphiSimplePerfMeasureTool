@@ -15,7 +15,7 @@ interface
 
 uses
   WinApi.Windows,
-  JCLDebug;
+  JclMapFileReader;
 
 type
   IDebugThread = interface
@@ -44,7 +44,7 @@ type
     function CodeEnd: NativeUInt;
 
     ///<summary>Map file associated with the module. Returns nil if no map file is given</summary>
-    function MapScanner: TJCLMapScanner;
+    function MapScanner: TJclMapScannerEx;
   end;
 
   IDebugProcess = interface( IDebugModule )
@@ -70,6 +70,8 @@ type
     FullyQualifiedMethodName: string;
     /// <summary>The name of the module. This is the name of the module (w/o dpr/dpk/exe/bpl) where the binary code resides</summary>
     ModuleName: string;
+    /// <summary>First Entry point for this method. This is significant in case of method overloading</summary>
+    MethodEntryVirtualAddress: Cardinal;
 
     /// <summary>This is the name of the module/unit where code is defined. UnitName w/o pas</summary>
     UnitName: string;

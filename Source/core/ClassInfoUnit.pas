@@ -31,8 +31,9 @@ type
   end;
 
   TProcedureInfo = class( TEnumerable<Integer> )
-  private
+  strict private
     FName: String;
+    FMethodEntrypoint: Cardinal;
     FLines: TDictionary<Integer, TSimpleBreakPointList>;
     FEntryPoint: IBreakPoint;
     FExitPoint: IBreakPoint;
@@ -75,8 +76,9 @@ type
     function LineNumbers: string;
 
     property Name: string read GetName;
+    property MethodEntryPoint: Cardinal read FMethodEntrypoint;
 
-    constructor Create( const AName: string );
+    constructor Create( const AName: string; const aMethodEntrypoint: Cardinal );
     destructor Destroy; override;
     function IsLineCovered( const ALineNo: Integer ): Boolean;
 
@@ -88,6 +90,7 @@ type
   strict private
     FName: String;
     FProcedures: TDictionary<string, TProcedureInfo>;
+    function GetProcedureKeyValue( const aProcedureName: string; const aMethodEntrypoint: Cardinal ): string;
     procedure ClearProcedures;
 
     function GetProcedureCount: Integer;
@@ -109,7 +112,7 @@ type
 
     constructor Create( const AClassName: string );
     destructor Destroy; override;
-    function EnsureProcedure( const AProcedureName: string ): TProcedureInfo;
+    function EnsureProcedure( const aProcedureName: string; const aMethodEntrypoint: Cardinal ): TProcedureInfo;
     procedure AddBreakpoint( const aBreakPoint: IBreakPoint );
     procedure RemoveBreakPointsForModule( const aBinaryModule: IDebugModule );
   end;
@@ -670,12 +673,15 @@ begin
     FProcedures[Key].Free;
 end;
 
-function TClassInfo.EnsureProcedure( const AProcedureName: string ): TProcedureInfo;
+function TClassInfo.EnsureProcedure( const aProcedureName: string; const aMethodEntrypoint: Cardinal ): TProcedureInfo;
+var
+  vProcKey: string;
 begin
-  if not FProcedures.TryGetValue( AProcedureName, Result ) then
+  vProcKey := GetProcedureKeyValue( aProcedureName, aMethodEntrypoint );
+  if not FProcedures.TryGetValue( vProcKey, Result ) then
   begin
-    Result := TProcedureInfo.Create( AProcedureName );
-    FProcedures.Add( AProcedureName, Result );
+    Result := TProcedureInfo.Create( aProcedureName, aMethodEntrypoint );
+    FProcedures.Add( vProcKey, Result );
   end;
 end;
 
@@ -706,7 +712,7 @@ begin
     CurrentInfo.RemoveBreakPointsForModule( aBinaryModule );
     if ( CurrentInfo.LineCount = 0 ) then
     begin
-      FProcedures.Remove( CurrentInfo.Name );
+      FProcedures.Remove( GetProcedureKeyValue( CurrentInfo.Name, CurrentInfo.MethodEntryPoint ) );
       CurrentInfo.Free;
     end;
   end;
@@ -722,13 +728,18 @@ begin
   Result := FProcedures.Count;
 end;
 
+function TClassInfo.GetProcedureKeyValue( const aProcedureName: string; const aMethodEntrypoint: Cardinal ): string;
+begin
+  Result := Format( '%s[%d]', [aProcedureName, aMethodEntrypoint] ).ToLowerInvariant;
+end;
+
 procedure TClassInfo.AddBreakpoint( const aBreakPoint: IBreakPoint );
 var
   BreakpointDetails: TBreakPointDetail;
   ProcInfo: TProcedureInfo;
 begin
   BreakpointDetails := aBreakPoint.Details;
-  ProcInfo := EnsureProcedure( BreakpointDetails.FullyQualifiedMethodName );
+  ProcInfo := EnsureProcedure( BreakpointDetails.FullyQualifiedMethodName, BreakpointDetails.MethodEntryVirtualAddress );
   ProcInfo.AddBreakpoint( aBreakPoint );
 end;
 
@@ -768,11 +779,12 @@ end;
 {$ENDREGION 'TClassInfo'}
 {$REGION 'TProcedureInfo'}
 
-constructor TProcedureInfo.Create( const AName: string );
+constructor TProcedureInfo.Create( const AName: string; const aMethodEntrypoint: Cardinal );
 begin
   inherited Create;
 
   FName := AName;
+  FMethodEntrypoint := aMethodEntrypoint;
   FLines := TDictionary<Integer, TSimpleBreakPointList>.Create;
   // init time counters
   FMinTime := TTimeSpan.MaxValue;

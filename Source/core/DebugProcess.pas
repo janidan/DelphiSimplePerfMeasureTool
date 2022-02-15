@@ -19,7 +19,7 @@ uses
   DebuggerApi,
   LoggingApi,
   Generics.Collections,
-  JCLDebug;
+  JclMapFileReader;
 
 type
   TDebugProcess = class( TInterfacedObject, IDebugProcess )
@@ -34,7 +34,7 @@ type
     FFilename: string;
     FFilepath: string;
     FHFile: THandle;
-    FMapScanner: TJCLMapScanner;
+    FMapScanner: TJclMapScannerEx;
   public
     constructor Create( //
       const aProcessId: DWORD; //
@@ -42,7 +42,7 @@ type
       const aProcessBase: NativeUInt; //
       const aFilepath: string; //
       const aHFile: THandle; //
-      const aMapScanner: TJCLMapScanner; //
+      const aMapScanner: TJclMapScannerEx; //
       const aLogManager: ILogManager );
     destructor Destroy; override;
 
@@ -63,7 +63,7 @@ type
     function Size: Cardinal;
     function CodeBegin: NativeUInt;
     function CodeEnd: NativeUInt;
-    function MapScanner: TJCLMapScanner;
+    function MapScanner: TJclMapScannerEx;
     function FindDebugModuleFromAddress( Addr: Pointer ): IDebugModule;
 
     function GetThreadById( const aThreadId: DWORD ): IDebugThread;
@@ -89,7 +89,7 @@ begin
 end;
 
 constructor TDebugProcess.Create( const aProcessId: DWORD; const aProcessHandle: THandle; const aProcessBase: NativeUInt; const aFilepath: string;
-  const aHFile: THandle; const aMapScanner: TJCLMapScanner; const aLogManager: ILogManager );
+  const aHFile: THandle; const aMapScanner: TJclMapScannerEx; const aLogManager: ILogManager );
 begin
   inherited Create;
 
@@ -190,7 +190,7 @@ begin
   Result := GetImageCodeSize( FFilepath );
 end;
 
-function TDebugProcess.MapScanner: TJCLMapScanner;
+function TDebugProcess.MapScanner: TJclMapScannerEx;
 begin
   Result := FMapScanner;
 end;

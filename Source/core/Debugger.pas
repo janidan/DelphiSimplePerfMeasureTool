@@ -25,7 +25,8 @@ uses
   LoggingApi,
   ConfigUnitList,
   ClassInfoUnit,
-  JwaPsApi;
+  JwaPsApi,
+  JclMapFileReader;
 
 type
   {$SCOPEDENUMS ON}
@@ -33,7 +34,7 @@ type
 
   TDebugger = class( TObject )
   strict private
-    FMapScanner: TJCLMapScanner;
+    FMapScanner: TJclMapScannerEx;
     FDebugProcess: IDebugProcess;
     FProcessID: DWORD;
     FBreakPointList: IBreakPointList;
@@ -46,7 +47,7 @@ type
     procedure AddBreakPoints( //
       const aUnitsList: TConfigUnitList; //
       const AModule: IDebugModule; //
-      const AMapScanner: TJCLMapScanner );
+      const AMapScanner: TJclMapScannerEx );
 
     function Debug: TDebuggerResult;
     function StartProcessToDebug: Boolean;
@@ -177,7 +178,7 @@ begin
     Exit( TDebuggerResult.Error );
   end;
 
-  FMapScanner := TJCLMapScanner.Create( vMapFilename );
+  FMapScanner := TJclMapScannerEx.Create( vMapFilename );
   try
     if FMapScanner.LineNumbersCnt = 0 then
     begin
@@ -288,13 +289,14 @@ begin
   end;
 end;
 
-procedure TDebugger.AddBreakPoints( const aUnitsList: TConfigUnitList; const AModule: IDebugModule; const AMapScanner: TJCLMapScanner );
+procedure TDebugger.AddBreakPoints( const aUnitsList: TConfigUnitList; const AModule: IDebugModule; const AMapScanner: TJclMapScannerEx );
 var
   vLineIndex: Integer;
   vBreakPoint: IBreakPoint;
   vUnitFileName: string;
   vUnitModuleName: string;
   vMapLineNumber: TJclMapLineNumber;
+  vProcData: TJclMapProcName;
   vFullyQualifiedMethodName: string;
   vBreakpointAddress: Pointer;
 begin
@@ -314,7 +316,8 @@ begin
         if ExtractFileExt( vUnitFileName ) = '' then
           vUnitFileName := vUnitFileName + '.pas';
         vUnitModuleName := AMapScanner.ModuleNameFromAddr( vMapLineNumber.VA );
-        vFullyQualifiedMethodName := AMapScanner.ProcNameFromAddr( vMapLineNumber.VA );
+        vProcData := AMapScanner.ProcDataFromAddr( vMapLineNumber.VA );
+        vFullyQualifiedMethodName := vProcData.ProcName.CachedValue;
 
         if aUnitsList.MonitorProcedure( vUnitModuleName, vFullyQualifiedMethodName ) then
         begin
@@ -325,7 +328,7 @@ begin
             vBreakPoint := TBreakPoint.Create( FDebugProcess, //
               vBreakpointAddress, vMapLineNumber.VA, //
               AModule, //
-              vFullyQualifiedMethodName, //
+              vFullyQualifiedMethodName, vProcData.VA, //
               AModule.Name, vUnitModuleName, vUnitFileName, vMapLineNumber.LineNumber, FLogManager );
             FBreakPointList.Add( vBreakPoint );
             FModuleList.AddBreakpoint( vBreakPoint );
@@ -393,7 +396,7 @@ var
   BreakPointDetailIndex: Integer;
   ExceptionRecord: EXCEPTION_RECORD;
   Module: IDebugModule;
-  MapScanner: TJCLMapScanner;
+  MapScanner: TJclMapScannerEx;
 begin
   ADebugEventHandlingResult := Cardinal( DBG_EXCEPTION_NOT_HANDLED );
 
@@ -529,7 +532,7 @@ var
   MapLineNumber: TJclMapLineNumber;
   DebugThread: IDebugThread;
   Module: IDebugModule;
-  vMapScanner: TJCLMapScanner;
+  vMapScanner: TJclMapScannerEx;
 begin
   ContextRecord.ContextFlags := CONTEXT_ALL;
 
@@ -616,7 +619,7 @@ var
   DllName: string;
   Module: TDebugModule;
   MapFile: string;
-  MapScanner: TJCLMapScanner;
+  MapScanner: TJclMapScannerEx;
 begin
   DllName := GetDllName( FDebugProcess.Handle, ADebugEvent.LoadDll.lpBaseOfDll );
 
@@ -638,7 +641,7 @@ begin
       if FileExists( MapFile ) then
       begin
         FLogManager.Log( 'Loading map file:' + MapFile );
-        MapScanner := TJCLMapScanner.Create( MapFile );
+        MapScanner := TJclMapScannerEx.Create( MapFile );
       end
       else
         MapScanner := nil;

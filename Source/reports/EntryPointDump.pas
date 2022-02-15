@@ -18,6 +18,7 @@ uses
   System.IOUtils,
   System.Classes,
   JclDebug,
+  JclMapFileReader,
   LoggingApi,
   CoverageConfiguration,
   ConfigUnitList,
@@ -30,7 +31,7 @@ implementation
 function DumpMapFileEntrypoints( const aBinaryFile: string; const aCoverageConfiguration: ICoverageConfiguration; const aOutputLogger: ILogger ): Boolean;
 var
   vMapFilename: string;
-  vMapScanner: TJCLMapScanner;
+  vMapScanner: TJclMapScannerEx;
   vUnitList: TConfigUnitList;
   vMapLineNumber: TJclMapLineNumber;
   vUnitModuleName: string;
@@ -46,7 +47,7 @@ begin
   try
     vEntryPoints.Duplicates := TDuplicates.dupIgnore;
     vEntryPoints.Sorted := True;
-    vMapScanner := TJCLMapScanner.Create( vMapFilename );
+    vMapScanner := TJclMapScannerEx.Create( vMapFilename );
     try
       for var vLineIndex := 0 to vMapScanner.LineNumbersCnt - 1 do
       begin

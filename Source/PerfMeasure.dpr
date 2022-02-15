@@ -37,7 +37,8 @@ uses
   ConsoleReport in 'reports\ConsoleReport.pas',
   MainProgram in 'core\MainProgram.pas',
   ReportGenerator in 'reports\ReportGenerator.pas',
-  EntryPointDump in 'reports\EntryPointDump.pas';
+  EntryPointDump in 'reports\EntryPointDump.pas',
+  JclMapFileReader in 'core\JclMapFileReader.pas';
 
 // -dproj ..\..\Source\Sample\SimpleSample.dproj -od report -lcon -u BplUnit BplUnit.Second mainForm SimpleSample -html -xml
 // -e ..\..\build\Win32\SimpleSample.exe -m ..\..\build\Win32\SimpleSample.map -sd ..\..\Source -od report -lcon -u BplUnit BplUnit.Second mainForm SimpleSample -html -xml

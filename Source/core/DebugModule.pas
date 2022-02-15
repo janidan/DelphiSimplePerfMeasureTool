@@ -16,7 +16,7 @@ interface
 uses
   Classes,
   DebuggerApi,
-  JCLDebug;
+  JclMapFileReader;
 
 type
   TDebugModule = class( TInterfacedObject, IDebugModule )
@@ -29,7 +29,7 @@ type
     FSize: Cardinal;
     FCodeBegin: NativeUInt;
     FCodeEnd: NativeUInt;
-    FMapScanner: TJCLMapScanner;
+    FMapScanner: TJclMapScannerEx;
 
     function Name: string;
     function Filename: string;
@@ -40,9 +40,9 @@ type
     function Size: Cardinal;
     function CodeBegin: NativeUInt;
     function CodeEnd: NativeUInt;
-    function MapScanner: TJCLMapScanner;
+    function MapScanner: TJclMapScannerEx;
   public
-    constructor Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJCLMapScanner );
+    constructor Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJclMapScannerEx );
     destructor Destroy; override;
     procedure AfterConstruction; override;
   end;
@@ -66,7 +66,7 @@ begin
   Result := FCodeEnd;
 end;
 
-constructor TDebugModule.Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJCLMapScanner );
+constructor TDebugModule.Create( const aFilepath: string; const aHFile: THandle; const aBase: NativeUInt; const aMapScanner: TJclMapScannerEx );
 begin
   inherited Create;
   FFilepath := aFilepath;
@@ -167,7 +167,7 @@ begin
   Result := FSize;
 end;
 
-function TDebugModule.MapScanner: TJCLMapScanner;
+function TDebugModule.MapScanner: TJclMapScannerEx;
 begin
   Result := FMapScanner;
 end;

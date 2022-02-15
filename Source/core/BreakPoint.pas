@@ -65,6 +65,7 @@ type
       const aVirtualAddress: Cardinal; //
       const aModule: IDebugModule; //
       const aFQName: string; //
+      const aMethodEntryVirtualAddress: Cardinal; //
       const aModuleName: string; //
       const aUnitName: string; //
       const aUnitFileName: string; //
@@ -81,8 +82,16 @@ uses
   CoverageConfiguration,
   DebuggerUtils;
 
-constructor TBreakPoint.Create( const aDebugProcess: IDebugProcess; const aAddress: Pointer; const aVirtualAddress: Cardinal; const aModule: IDebugModule;
-  const aFQName: string; const aModuleName: string; const aUnitName: string; const aUnitFileName: string; const aLineNumber: integer;
+constructor TBreakPoint.Create( const aDebugProcess: IDebugProcess; //
+  const aAddress: Pointer; //
+  const aVirtualAddress: Cardinal; //
+  const aModule: IDebugModule; //
+  const aFQName: string; //
+  const aMethodEntryVirtualAddress: Cardinal; //
+  const aModuleName: string; //
+  const aUnitName: string; //
+  const aUnitFileName: string; //
+  const aLineNumber: integer; //
   const aLogManager: ILogManager );
 begin
   inherited Create;
@@ -95,6 +104,7 @@ begin
 
   FDetails.FullyQualifiedMethodName := aFQName;
   FDetails.ModuleName := aModuleName;
+  FDetails.MethodEntryVirtualAddress := aMethodEntryVirtualAddress;
   FDetails.UnitName := aUnitName;
   FDetails.UnitFileName := aUnitFileName;
   FDetails.Line := aLineNumber;
@@ -152,8 +162,8 @@ end;
 
 function TBreakPoint.DetailsToString: string;
 begin
-  Result := Format( 'Breakpoint at %s[%s]: %s.%s.%s[%d]', [AddressToString( FAddress ), AddressToString( FDetails.VirtualAddress ), //
-    FDetails.ModuleName, FDetails.ClassName, FDetails.MethodName, FDetails.Line] );
+  Result := Format( 'Breakpoint at %s[%s]: %s.%s.%s%d[%d]', [AddressToString( FAddress ), AddressToString( FDetails.VirtualAddress ), //
+    FDetails.ModuleName, FDetails.ClassName, FDetails.MethodName, FDetails.MethodEntryVirtualAddress, FDetails.Line] );
 end;
 
 procedure TBreakPoint.DoOnHit;
